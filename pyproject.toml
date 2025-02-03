@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "noema"
+version = "0.1.0"
+description = "Deep neural theorem prover with learned premise retrieval, 24-block policy/value Transformer, hypergraph search, and verified Lean 4 checking"
+readme = "README.md"
+requires-python = ">=3.12"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "Aneesh Krishna"}
+]
+dependencies = [
+    "torch>=2.2.0",
+    "numpy>=1.26.0",
+    "pydantic>=2.5.0",
+    "pyyaml>=6.0",
+    "click>=8.1.0",
+    "networkx>=3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-timeout>=2.2.0",
+]
+
+[project.scripts]
+noema = "noema.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
