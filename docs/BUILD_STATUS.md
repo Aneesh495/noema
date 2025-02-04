@@ -9,7 +9,7 @@
 
 | Phase | Description | Status | Commit / Notes |
 |---|---|---|---|
-| Phase 1 | Repository initialization, contracts, build skeleton, git remote | In Progress | Initializing |
+| Phase 1 | Repository initialization, contracts, build skeleton, git remote | Passed | Commit cc1e4df & contracts implemented and tested |
 | Phase 2 | Real Lean 4 bridge, transition probe, lake package | Pending | Pinned Lean 4.8.0 |
 | Phase 3 | Corpus generation, trace extraction, contamination audit | Pending | - |
 | Phase 4 | Math-aware tokenizer and nonpadding token accounting | Pending | - |
