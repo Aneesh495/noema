@@ -13,7 +13,7 @@
 | Phase 2 | Real Lean 4 bridge, transition probe, lake package | Passed | Lake NoemaBridge package & Lean 4.8.0 formal bridge tested |
 | Phase 3 | Corpus generation, trace extraction, contamination audit | Passed | TaskGenerator, public mathlib (300), miniF2F (244), and contamination auditor tested |
 | Phase 4 | Math-aware tokenizer and nonpadding token accounting | Passed | MathTokenizer, TokenAccountant, BatchCollator tested |
-| Phase 5 | Lexical and learned premise retrieval | Pending | - |
+| Phase 5 | Lexical and learned premise retrieval | Passed | BM25 LexicalRetriever, DenseDualEncoder, HardNegativeSampler, PremiseIndex tested |
 | Phase 6 | Original 24-block, 40M+ Transformer model | Pending | - |
 | Phase 7 | Supervised training, joint loss, checkpointing | Pending | - |
 | Phase 8 | Coupled-goal AND/OR proof-hypergraph search | Pending | - |
