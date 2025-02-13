@@ -15,7 +15,7 @@
 | Phase 4 | Math-aware tokenizer and nonpadding token accounting | Passed | MathTokenizer, TokenAccountant, BatchCollator tested |
 | Phase 5 | Lexical and learned premise retrieval | Passed | BM25 LexicalRetriever, DenseDualEncoder, HardNegativeSampler, PremiseIndex tested |
 | Phase 6 | Original 24-block, 40M+ Transformer model | Passed | 24 distinct blocks, >=40M trainable parameters verified, gradient flow tested |
-| Phase 7 | Supervised training, joint loss, checkpointing | Pending | - |
+| Phase 7 | Supervised training, joint loss, checkpointing | Passed | JointLoss, CheckpointManager, NoemaTrainer, ExpertIterationEngine tested |
 | Phase 8 | Coupled-goal AND/OR proof-hypergraph search | Pending | - |
 | Phase 9 | Independent fresh-process proof checker and certificate audit | Pending | - |
 | Phase 10 | Training-only verified expert iteration | Pending | - |
