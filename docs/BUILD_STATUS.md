@@ -17,8 +17,8 @@
 | Phase 6 | Original 24-block, 40M+ Transformer model | Passed | 24 distinct blocks, >=40M trainable parameters verified, gradient flow tested |
 | Phase 7 | Supervised training, joint loss, checkpointing | Passed | JointLoss, CheckpointManager, NoemaTrainer, ExpertIterationEngine tested |
 | Phase 8 | Coupled-goal AND/OR proof-hypergraph search | Passed | ProofSearchEngine, HypergraphEngine, PriorityScorer tested |
-| Phase 9 | Independent fresh-process proof checker and certificate audit | Pending | - |
-| Phase 10 | Training-only verified expert iteration | Pending | - |
+| Phase 9 | Independent fresh-process proof checker and certificate audit | Passed | AxiomAuditor, CertificateManager, standalone replay tested |
+| Phase 10 | Training-only verified expert iteration and bounded worker pool | Passed | BoundedWorkerPool, ExpertIterationEngine tested |
 | Phase 11 | Proof tree viewer and interactive demonstrations | Pending | - |
 | Phase 12 | Research campaign, benchmarks, ablations, verification | Pending | - |
 
