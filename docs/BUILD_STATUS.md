@@ -20,7 +20,7 @@
 | Phase 9 | Independent fresh-process proof checker and certificate audit | Passed | AxiomAuditor, CertificateManager, standalone replay tested |
 | Phase 10 | Training-only verified expert iteration and bounded worker pool | Passed | BoundedWorkerPool, ExpertIterationEngine tested |
 | Phase 11 | Proof tree viewer and interactive demonstrations | Passed | TerminalViewer, HTMLViewer, noema.demo verified |
-| Phase 12 | Research campaign, benchmarks, ablations, verification | Pending | - |
+| Phase 12 | Research campaign, benchmarks, ablations, verification | Passed | BenchmarkHarness, AblationRunner, PerturbationTester, EvidenceVerifier, 12 negative controls passed |
 
 ## Capability Register & Gates (NA01-NA12)
 
