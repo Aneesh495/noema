@@ -2,6 +2,12 @@
 
 from noema.formal.bridge import FormalBridge
 from noema.formal.checker import IndependentChecker
+from noema.formal.elaboration import (
+    ElaborationError,
+    ProofTermSummary,
+    TacticASTNode,
+    TacticElaborator,
+)
 from noema.formal.parser import GoalParser
 from noema.formal.repl import LeanReplError, PersistentLeanSession
 from noema.formal.types import TransitionResult, TransitionStatus
@@ -14,4 +20,8 @@ __all__ = [
     "IndependentChecker",
     "PersistentLeanSession",
     "LeanReplError",
+    "TacticElaborator",
+    "ProofTermSummary",
+    "TacticASTNode",
+    "ElaborationError",
 ]
