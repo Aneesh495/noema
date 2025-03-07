@@ -1,6 +1,7 @@
 """Proof-hypergraph search subsystem: budgets, priority heuristics, and best-first search engine."""
 
 from noema.search.budget import SearchAccounting, SearchBudget, TerminationReason
+from noema.search.canonical import CanonicalGoal, CyclePruner, GoalCanonicalizer
 from noema.search.engine import ProofSearchEngine, SearchResult
 from noema.search.hypergraph_engine import HypergraphEngine
 from noema.search.mcts import MCTSHyperedge, MCTSNode, MCTSProofSearch
@@ -18,4 +19,7 @@ __all__ = [
     "MCTSProofSearch",
     "MCTSNode",
     "MCTSHyperedge",
+    "GoalCanonicalizer",
+    "CanonicalGoal",
+    "CyclePruner",
 ]
