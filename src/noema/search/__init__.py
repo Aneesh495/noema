@@ -1,5 +1,12 @@
 """Proof-hypergraph search subsystem: budgets, priority heuristics, and best-first search engine."""
 
+from noema.search.backtracking import (
+    BacktrackDecision,
+    ConflictAnalyzer,
+    DependencyDirectedBacktracker,
+    Nogood,
+    NogoodStore,
+)
 from noema.search.budget import SearchAccounting, SearchBudget, TerminationReason
 from noema.search.canonical import CanonicalGoal, CyclePruner, GoalCanonicalizer
 from noema.search.engine import ProofSearchEngine, SearchResult
@@ -22,4 +29,9 @@ __all__ = [
     "GoalCanonicalizer",
     "CanonicalGoal",
     "CyclePruner",
+    "Nogood",
+    "NogoodStore",
+    "ConflictAnalyzer",
+    "DependencyDirectedBacktracker",
+    "BacktrackDecision",
 ]

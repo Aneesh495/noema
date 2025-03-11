@@ -71,16 +71,27 @@ class TacticAction(BaseModel):
                 premises = [args[0]]
                 parameters = args[1:]
         elif cmd in ("rw", "rewrite"):
-            if args and args[0] == "<-":
+            if args and args[0] in ("<-", "←"):
                 kind = TacticKind.REWRITE_REV
                 if len(args) > 1:
-                    premises = [args[1]]
+                    raw_p = args[1].strip("[]")
+                    premises = [raw_p] if raw_p else []
                     parameters = args[2:]
             else:
                 kind = TacticKind.REWRITE
                 if args:
-                    premises = [args[0]]
+                    raw_p = args[0].strip("[]")
+                    premises = [raw_p] if raw_p else []
                     parameters = args[1:]
+        elif cmd == "have":
+            kind = TacticKind.HAVE
+            if ":=" in clean:
+                rhs = clean.split(":=", 1)[1].strip()
+                if rhs:
+                    raw_p = rhs.split()[0].strip("[]")
+                    if raw_p:
+                        premises = [raw_p]
+            parameters = args
         elif cmd == "cases":
             kind = TacticKind.CASES
             parameters = args
