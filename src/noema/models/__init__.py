@@ -13,12 +13,21 @@ from noema.models.heads import (
     PremisePointerHead,
     ProgressValueHead,
 )
+from noema.models.layers import (
+    MultiHeadAttention,
+    RMSNorm,
+    RotaryEmbedding,
+    SwiGLUFeedForward,
+    TransformerBlock,
+)
+from noema.models.rope import AdvancedRotaryEmbedding
 from noema.models.transformer import NoemaTransformer
 
 __all__ = [
     "TransformerConfig",
     "RMSNorm",
     "RotaryEmbedding",
+    "AdvancedRotaryEmbedding",
     "MultiHeadAttention",
     "SwiGLUFeedForward",
     "TransformerBlock",
