@@ -1,13 +1,7 @@
 """Noema deep neural Transformer models, layers, and readout heads."""
 
+from noema.models.attention import GroupedQueryAttention, KVCache
 from noema.models.config import TransformerConfig
-from noema.models.layers import (
-    RMSNorm,
-    RotaryEmbedding,
-    MultiHeadAttention,
-    SwiGLUFeedForward,
-    TransformerBlock,
-)
 from noema.models.heads import (
     PolicyTacticHead,
     PremisePointerHead,
@@ -29,6 +23,8 @@ __all__ = [
     "RotaryEmbedding",
     "AdvancedRotaryEmbedding",
     "MultiHeadAttention",
+    "GroupedQueryAttention",
+    "KVCache",
     "SwiGLUFeedForward",
     "TransformerBlock",
     "PolicyTacticHead",

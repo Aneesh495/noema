@@ -92,17 +92,18 @@ class AdvancedRotaryEmbedding(nn.Module):
         else:
             raise ValueError(f"Unknown RoPE scaling_type: {self.scaling_type}")
 
-    def forward(self, x: torch.Tensor, seq_len: int) -> tuple[torch.Tensor, torch.Tensor]:
-        """Return (cos, sin) tensors sliced to seq_len and broadcastable to x."""
-        if seq_len > self.cos_cached.shape[0]:
+    def forward(self, x: torch.Tensor, seq_len: int, start_pos: int = 0) -> tuple[torch.Tensor, torch.Tensor]:
+        """Return (cos, sin) tensors sliced from start_pos to start_pos + seq_len."""
+        end_pos = start_pos + seq_len
+        if end_pos > self.cos_cached.shape[0]:
             # Dynamically recompute if context expands beyond precomputed cache
-            t = torch.arange(seq_len, device=x.device, dtype=torch.float32)
+            t = torch.arange(start_pos, end_pos, device=x.device, dtype=torch.float32)
             freqs = torch.outer(t, self.inv_freq.to(x.device))
             cos = freqs.cos()
             sin = freqs.sin()
         else:
-            cos = self.cos_cached[:seq_len].to(x.device)
-            sin = self.sin_cached[:seq_len].to(x.device)
+            cos = self.cos_cached[start_pos:end_pos].to(x.device)
+            sin = self.sin_cached[start_pos:end_pos].to(x.device)
 
         return cos, sin
 
@@ -115,15 +116,15 @@ class AdvancedRotaryEmbedding(nn.Module):
         mscale: float = 1.0,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         """Apply rotary embedding to query and key tensors with optional YaRN mscale."""
-        # q, k shape: (batch, seq_len, num_heads, head_dim) or (batch, num_heads, seq_len, head_dim)
-        if q.dim() == 4 and q.shape[1] != cos.shape[0]:
-            # Heads in dim 1: (batch, num_heads, seq_len, head_dim)
-            cos = cos.unsqueeze(0).unsqueeze(1)  # (1, 1, seq_len, dim/2 or dim)
-            sin = sin.unsqueeze(0).unsqueeze(1)
-        elif q.dim() == 4:
-            # Heads in dim 2: (batch, seq_len, num_heads, head_dim)
-            cos = cos.unsqueeze(0).unsqueeze(2)  # (1, seq_len, 1, head_dim)
-            sin = sin.unsqueeze(0).unsqueeze(2)
+        if q.dim() == 4:
+            if q.shape[2] == cos.shape[0]:
+                # Shape: (batch, num_heads, seq_len, head_dim)
+                cos = cos.unsqueeze(0).unsqueeze(1)
+                sin = sin.unsqueeze(0).unsqueeze(1)
+            else:
+                # Shape: (batch, seq_len, num_heads, head_dim)
+                cos = cos.unsqueeze(0).unsqueeze(2)
+                sin = sin.unsqueeze(0).unsqueeze(2)
         elif q.dim() == 3:
             cos = cos.unsqueeze(0)
             sin = sin.unsqueeze(0)
