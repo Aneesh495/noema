@@ -14,7 +14,11 @@ from noema.models.layers import (
     SwiGLUFeedForward,
     TransformerBlock,
 )
-from noema.models.rope import AdvancedRotaryEmbedding
+from noema.models.calibration import (
+    CalibrationMetrics,
+    ConformalTacticPredictor,
+    TemperatureCalibrator,
+)
 from noema.models.transformer import NoemaTransformer
 
 __all__ = [
@@ -31,4 +35,7 @@ __all__ = [
     "PremisePointerHead",
     "ProgressValueHead",
     "NoemaTransformer",
+    "TemperatureCalibrator",
+    "ConformalTacticPredictor",
+    "CalibrationMetrics",
 ]
