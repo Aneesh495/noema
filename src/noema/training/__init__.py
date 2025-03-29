@@ -2,6 +2,11 @@
 
 from noema.training.checkpoints import CheckpointManager, CheckpointMetadata
 from noema.training.curriculum import CurriculumScheduler, DifficultyBand
+from noema.training.distributed import (
+    DynamicLossScaler,
+    ExponentialMovingAverage,
+    GradientAccumulator,
+)
 from noema.training.expert_iteration import (
     ExpertIterationEngine,
     ExpertIterationSummary,
@@ -19,4 +24,7 @@ __all__ = [
     "ExpertIterationSummary",
     "CurriculumScheduler",
     "DifficultyBand",
+    "GradientAccumulator",
+    "DynamicLossScaler",
+    "ExponentialMovingAverage",
 ]
