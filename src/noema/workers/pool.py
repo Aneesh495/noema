@@ -100,5 +100,27 @@ class BoundedWorkerPool:
                 )
         return results
 
+    def execute_step(
+        self,
+        theorem: TheoremSpec,
+        current_state: ProofState,
+        action: TacticAction,
+        tactic_history: list[str] | None = None,
+        timeout_sec: float | None = None,
+    ) -> TransitionResult:
+        """Execute a single step synchronously via the bounded pool."""
+        future = self.submit_transition(
+            theorem=theorem,
+            current_state=current_state,
+            action=action,
+            history=tactic_history or [],
+            timeout_sec=timeout_sec,
+        )
+        return future.result()
+
+    def is_healthy(self) -> bool:
+        """Check if worker pool is active and receptive to work."""
+        return not self.executor._shutdown
+
     def shutdown(self, wait: bool = True) -> None:
         self.executor.shutdown(wait=wait)
