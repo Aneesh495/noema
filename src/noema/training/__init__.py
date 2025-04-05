@@ -2,6 +2,11 @@
 
 from noema.training.checkpoints import CheckpointManager, CheckpointMetadata
 from noema.training.curriculum import CurriculumScheduler, DifficultyBand
+from noema.training.distillation import (
+    SelfImitationBuffer,
+    SimplifiedTrace,
+    TraceSimplifier,
+)
 from noema.training.distributed import (
     DynamicLossScaler,
     ExponentialMovingAverage,
@@ -27,4 +32,7 @@ __all__ = [
     "GradientAccumulator",
     "DynamicLossScaler",
     "ExponentialMovingAverage",
+    "TraceSimplifier",
+    "SelfImitationBuffer",
+    "SimplifiedTrace",
 ]
