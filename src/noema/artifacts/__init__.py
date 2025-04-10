@@ -2,6 +2,7 @@
 
 from noema.artifacts.axiom_auditor import AxiomAuditor
 from noema.artifacts.certificate_manager import CertificateManager
+from noema.artifacts.merkle import MerkleAuditTree, MerkleInclusionProof
 from noema.artifacts.proof_term_validator import (
     ASTValidationResult,
     ProofTermAST,
@@ -14,4 +15,6 @@ __all__ = [
     "ProofTermASTValidator",
     "ProofTermAST",
     "ASTValidationResult",
+    "MerkleAuditTree",
+    "MerkleInclusionProof",
 ]
