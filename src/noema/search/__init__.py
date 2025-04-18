@@ -13,6 +13,14 @@ from noema.search.engine import ProofSearchEngine, SearchResult
 from noema.search.hypergraph_engine import HypergraphEngine
 from noema.search.mcts import MCTSHyperedge, MCTSNode, MCTSProofSearch
 from noema.search.priority import PriorityScorer, SearchStrategy
+from noema.search.rewriting import (
+    EquationalProver,
+    FirstOrderTerm,
+    KnuthBendixCompletion,
+    RewriteRule,
+    TermRewriter,
+    lexicographic_path_order,
+)
 from noema.search.unification import (
     CoupledMetavariableTracker,
     Term,
@@ -44,4 +52,10 @@ __all__ = [
     "UnificationEngine",
     "UnificationError",
     "CoupledMetavariableTracker",
+    "FirstOrderTerm",
+    "RewriteRule",
+    "TermRewriter",
+    "KnuthBendixCompletion",
+    "EquationalProver",
+    "lexicographic_path_order",
 ]
