@@ -13,6 +13,7 @@ from noema.search.engine import ProofSearchEngine, SearchResult
 from noema.search.hypergraph_engine import HypergraphEngine
 from noema.search.mcts import MCTSHyperedge, MCTSNode, MCTSProofSearch
 from noema.search.priority import PriorityScorer, SearchStrategy
+from noema.search.congruence import CongruenceClosure, Justification, ProofStep
 from noema.search.rewriting import (
     EquationalProver,
     FirstOrderTerm,
@@ -58,4 +59,7 @@ __all__ = [
     "KnuthBendixCompletion",
     "EquationalProver",
     "lexicographic_path_order",
+    "CongruenceClosure",
+    "Justification",
+    "ProofStep",
 ]
