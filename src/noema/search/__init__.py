@@ -13,6 +13,12 @@ from noema.search.engine import ProofSearchEngine, SearchResult
 from noema.search.hypergraph_engine import HypergraphEngine
 from noema.search.mcts import MCTSHyperedge, MCTSNode, MCTSProofSearch
 from noema.search.priority import PriorityScorer, SearchStrategy
+from noema.search.beam import (
+    BeamCandidate,
+    BeamGroup,
+    DiverseBeamSearch,
+    SpeculativeTacticTree,
+)
 from noema.search.congruence import CongruenceClosure, Justification, ProofStep
 from noema.search.rewriting import (
     EquationalProver,
@@ -62,4 +68,8 @@ __all__ = [
     "CongruenceClosure",
     "Justification",
     "ProofStep",
+    "DiverseBeamSearch",
+    "BeamCandidate",
+    "BeamGroup",
+    "SpeculativeTacticTree",
 ]
