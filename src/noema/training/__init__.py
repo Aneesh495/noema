@@ -17,6 +17,14 @@ from noema.training.expert_iteration import (
     ExpertIterationSummary,
 )
 from noema.training.loss import JointLoss
+from noema.training.ppo import (
+    PPOBatch,
+    PPOCriterion,
+    PPOLossResult,
+    PPOReplayBuffer,
+    PPOTrajectoryStep,
+    compute_generalized_advantages,
+)
 from noema.training.trainer import NoemaTrainer, TrainingConfig
 
 __all__ = [
@@ -35,4 +43,10 @@ __all__ = [
     "TraceSimplifier",
     "SelfImitationBuffer",
     "SimplifiedTrace",
+    "PPOTrajectoryStep",
+    "PPOBatch",
+    "PPOCriterion",
+    "PPOLossResult",
+    "PPOReplayBuffer",
+    "compute_generalized_advantages",
 ]
