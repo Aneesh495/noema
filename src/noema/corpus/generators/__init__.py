@@ -3,6 +3,7 @@ from noema.corpus.generators.inductive import InductiveTheoremGenerator
 from noema.corpus.generators.modular import ModularTheoremGenerator
 from noema.corpus.generators.order import OrderTheoremGenerator
 from noema.corpus.generators.set_theory import SetTheoryTheoremGenerator
+from noema.corpus.generators.topology import TopologyTheoremGenerator
 
 __all__ = [
     "AlgebraTheoremGenerator",
@@ -10,4 +11,5 @@ __all__ = [
     "InductiveTheoremGenerator",
     "SetTheoryTheoremGenerator",
     "ModularTheoremGenerator",
+    "TopologyTheoremGenerator",
 ]
