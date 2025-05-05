@@ -2,6 +2,11 @@
 
 from noema.artifacts.axiom_auditor import AxiomAuditor
 from noema.artifacts.certificate_manager import CertificateManager
+from noema.artifacts.graph_export import (
+    ExportedGraphEdge,
+    ExportedGraphNode,
+    ProofGraphExporter,
+)
 from noema.artifacts.merkle import MerkleAuditTree, MerkleInclusionProof
 from noema.artifacts.proof_term_validator import (
     ASTValidationResult,
@@ -17,4 +22,7 @@ __all__ = [
     "ASTValidationResult",
     "MerkleAuditTree",
     "MerkleInclusionProof",
+    "ProofGraphExporter",
+    "ExportedGraphNode",
+    "ExportedGraphEdge",
 ]
