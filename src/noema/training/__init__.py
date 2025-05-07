@@ -25,6 +25,12 @@ from noema.training.ppo import (
     PPOTrajectoryStep,
     compute_generalized_advantages,
 )
+from noema.training.self_play import (
+    ConjectureMutator,
+    CurriculumSelfPlayEngine,
+    RegretMatchingPolicy,
+    SelfPlayProofTask,
+)
 from noema.training.trainer import NoemaTrainer, TrainingConfig
 
 __all__ = [
@@ -49,4 +55,8 @@ __all__ = [
     "PPOLossResult",
     "PPOReplayBuffer",
     "compute_generalized_advantages",
+    "ConjectureMutator",
+    "RegretMatchingPolicy",
+    "CurriculumSelfPlayEngine",
+    "SelfPlayProofTask",
 ]
