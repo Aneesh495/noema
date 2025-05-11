@@ -10,6 +10,17 @@ from noema.formal.elaboration import (
 )
 from noema.formal.parser import GoalParser
 from noema.formal.repl import LeanReplError, PersistentLeanSession
+from noema.formal.tactics import (
+    AllGoalsTactic,
+    AtomicTactic,
+    FirstTactic,
+    FocusTactic,
+    RepeatTactic,
+    SeqTactic,
+    TacticNode,
+    TacticTreeOptimizer,
+    TryTactic,
+)
 from noema.formal.types import TransitionResult, TransitionStatus
 
 __all__ = [
@@ -24,4 +35,13 @@ __all__ = [
     "ProofTermSummary",
     "TacticASTNode",
     "ElaborationError",
+    "TacticNode",
+    "AtomicTactic",
+    "SeqTactic",
+    "RepeatTactic",
+    "TryTactic",
+    "FirstTactic",
+    "AllGoalsTactic",
+    "FocusTactic",
+    "TacticTreeOptimizer",
 ]
