@@ -3,6 +3,11 @@
 from noema.retrieval.dense import DenseDualEncoder
 from noema.retrieval.index import PremiseIndex
 from noema.retrieval.lexical import LexicalRetriever
+from noema.retrieval.graph_retriever import (
+    PersonalizedPageRankRetriever,
+    PremiseDependencyGraph,
+    PremiseNode,
+)
 from noema.retrieval.reranker import (
     PremiseCrossEncoder,
     PremiseReranker,
@@ -18,4 +23,7 @@ __all__ = [
     "PremiseCrossEncoder",
     "PremiseReranker",
     "ScoredPremise",
+    "PremiseDependencyGraph",
+    "PremiseNode",
+    "PersonalizedPageRankRetriever",
 ]
