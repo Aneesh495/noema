@@ -28,6 +28,17 @@ from noema.search.rewriting import (
     TermRewriter,
     lexicographic_path_order,
 )
+from noema.search.tableau import (
+    And,
+    Atom,
+    Formula,
+    Imp,
+    Not,
+    Or,
+    SemanticTableauProver,
+    SignedFormula,
+    TableauBranch,
+)
 from noema.search.unification import (
     CoupledMetavariableTracker,
     Term,
@@ -72,4 +83,13 @@ __all__ = [
     "BeamCandidate",
     "BeamGroup",
     "SpeculativeTacticTree",
+    "SemanticTableauProver",
+    "Formula",
+    "Atom",
+    "Not",
+    "And",
+    "Or",
+    "Imp",
+    "SignedFormula",
+    "TableauBranch",
 ]
