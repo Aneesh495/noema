@@ -1,8 +1,12 @@
-"""Evaluation subsystem: benchmark harness, ablation matrices, and perturbation controls."""
-
-from noema.evaluation.harness import BenchmarkHarness, BenchmarkMetrics
 from noema.evaluation.ablations import AblationRunner, AblationRunResult
-from noema.evaluation.perturbations import PerturbationTester, PerturbationSummary
+from noema.evaluation.generalization import (
+    CombinatorialTransferEvaluator,
+    GeneralizationReport,
+    HorizonEvaluationPoint,
+    ProofHorizonExtrapolator,
+)
+from noema.evaluation.harness import BenchmarkHarness, BenchmarkMetrics
+from noema.evaluation.perturbations import PerturbationSummary, PerturbationTester
 
 __all__ = [
     "BenchmarkHarness",
@@ -11,4 +15,8 @@ __all__ = [
     "AblationRunResult",
     "PerturbationTester",
     "PerturbationSummary",
+    "HorizonEvaluationPoint",
+    "GeneralizationReport",
+    "ProofHorizonExtrapolator",
+    "CombinatorialTransferEvaluator",
 ]
