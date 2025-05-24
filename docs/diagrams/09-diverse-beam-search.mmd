@@ -1,0 +1,27 @@
+flowchart TD
+    InitialGoal["Initial Open Goal State"] --> InitGroups["Partition Beam into G Diverse Groups"]
+
+    subgraph StepT ["Search Step t: Diverse Expansion"]
+        InitGroups --> Group1["Group 1: Standard Likelihood Expansion"]
+        InitGroups --> Group2["Group 2: Diversity Penalty wrt Group 1"]
+        InitGroups --> Group3["Group 3: Diversity Penalty wrt Groups 1 & 2"]
+    end
+
+    subgraph NeuralScoring ["Model Inference & Penalization"]
+        Group1 & Group2 & Group3 --> PolicyVal["Evaluate Policy Logits & State Value"]
+        PolicyVal --> DiversityLoss["Apply Hamming / N-Gram Dissimilarity Penalty"]
+    end
+
+    subgraph SpeculativeREPL ["Speculative Lean 4 REPL Execution"]
+        DiversityLoss --> TopCandidates["Select Top-B Diverse Candidates"]
+        TopCandidates --> WorkerPool["Parallel REPL Worker Processes"]
+        WorkerPool --> Elaborate["Concurrent Elaboration"]
+    end
+
+    subgraph BeamSelection ["Pruning & Next Frontier"]
+        Elaborate --> FilterValid["Filter Syntax & Kernel Errors"]
+        FilterValid --> CheckClosed{"Any Branch Solved?"}
+        CheckClosed -->|Yes| Finish["Return Minimal Proof Path"]
+        CheckClosed -->|No| NextFrontier["Update Beam for Step t+1"]
+        NextFrontier --> StepT
+    end

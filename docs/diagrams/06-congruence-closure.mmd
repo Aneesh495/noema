@@ -1,0 +1,31 @@
+flowchart TD
+    subgraph InputEquations ["Input Equational Hypotheses"]
+        Eq1["a = b"]
+        Eq2["b = c"]
+        Eq3["f(a) = d"]
+    end
+
+    subgraph EGraphStructure ["E-Graph & Union-Find State"]
+        EClassA["E-Class {a, b, c} (Root: a)"]
+        EClassFA["E-Class {f(a), f(b), f(c), d}"]
+        Lookup["Signature Table: f([a]) -> EClassFA"]
+        ParentForest["Proof Forest: Union Witness Pointers"]
+    end
+
+    Eq1 --> EClassA
+    Eq2 --> EClassA
+    Eq3 --> Lookup
+    Lookup --> EClassFA
+
+    subgraph CongruenceEngine ["Congruence Propagation"]
+        EClassA --> CheckSignatures{"Signature Collision?"}
+        CheckSignatures -->|f(a) congruent f(b)| Merge["Merge E-Classes"]
+        Merge --> UpdateParents["Update Explainability Witnesses"]
+    end
+
+    subgraph ProofGeneration ["Proof Extraction"]
+        Query["Query: Does f(c) = d hold?"] --> FindRoot["Find Canonical Roots"]
+        FindRoot --> PathExtract["Extract Shortest Path in Proof Forest"]
+        PathExtract --> TransitivityChain["Generate Transitivity & Congruence Steps"]
+        TransitivityChain --> LeanProof["Emit Lean 4 Tactic Proof Script"]
+    end

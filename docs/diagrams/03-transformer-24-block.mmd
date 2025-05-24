@@ -1,0 +1,19 @@
+flowchart TD
+    InputTokens["Token Sequence: State String + Goal State"] --> Embed["Token Embedding (d_model=512, V=16384)"]
+    Embed --> RoPE["Rotary Position Embeddings (RoPE)"]
+    
+    subgraph Stack ["24 Stacked Transformer Blocks (60.1M Parameters)"]
+        RoPE --> Block1["Block 1: Pre-RMSNorm -> Multi-Head Self-Attention -> SwiGLU MLP"]
+        Block1 --> Block2["Block 2: Pre-RMSNorm -> Multi-Head Self-Attention -> SwiGLU MLP"]
+        Block2 -.-> Block23["Block 23: Pre-RMSNorm -> Multi-Head Self-Attention -> SwiGLU MLP"]
+        Block23 --> Block24["Block 24: Pre-RMSNorm -> Multi-Head Self-Attention -> SwiGLU MLP"]
+    end
+
+    Block24 --> FinalNorm["Final RMSNorm"]
+    FinalNorm --> Pooler["Sequence Pooling (Mean / Cls)"]
+
+    subgraph OutputHeads ["Multi-Task Prediction Heads"]
+        Pooler --> PolicyHead["Tactic Policy Head (Autoregressive Logits / Vocab)"]
+        Pooler --> ValueHead["State Value Head (Scalar Proving Probability [0, 1])"]
+        Pooler --> ProgressHead["Censored Progress Head (Remaining Depth Survival Analysis)"]
+    end

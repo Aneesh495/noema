@@ -1,0 +1,21 @@
+flowchart TD
+    CurrentGoal["Current Lean 4 Goal Query"] --> Lexical["Lexical Premise Matcher (BM25)"]
+    CurrentGoal --> Dense["Dense Neural Embedder (Cosine Similarity)"]
+    CurrentGoal --> Graph["Knowledge Graph Walk (Personalized PageRank)"]
+
+    subgraph PremiseCorpus ["Lean 4 Premise Index"]
+        LibTheorems["Library Theorems & Lemmas"]
+        LocalHyps["Local Context Hypotheses"]
+        DependencyEdges["Premise Dependency DAG Edges"]
+    end
+
+    LibTheorems --> Lexical
+    LibTheorems --> Dense
+    DependencyEdges & LocalHyps --> Graph
+
+    Lexical --> RankScore1["BM25 Scores"]
+    Dense --> RankScore2["Dense Semantic Scores"]
+    Graph --> RankScore3["PPR Graph Centrality Scores"]
+
+    RankScore1 & RankScore2 & RankScore3 --> Fusion["Reciprocal Rank Fusion (RRF) & Calibration"]
+    Fusion --> TopPremises["Top-k Relevant Premises for Policy Context"]

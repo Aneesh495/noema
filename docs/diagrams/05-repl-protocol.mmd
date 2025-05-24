@@ -1,0 +1,26 @@
+sequenceDiagram
+    participant Client as Noema REPL Client (Python)
+    participant REPL as Lean 4 REPL Subprocess (lake env)
+    participant Lean as Lean 4 Elaborator & Kernel
+    participant Indep as Fresh Process Checker
+
+    Note over Client, REPL: Session Initialization
+    Client->>REPL: Spawn subprocess with NDJSON pipe
+    REPL-->>Client: Handshake & readiness confirmation
+
+    Note over Client, Lean: Tactic Step Execution
+    Client->>REPL: {"cmd": "run_tactic", "env": env_id, "tactic": "intro h"}
+    REPL->>Lean: Elaborate tactic on open goals
+    Lean-->>REPL: New goal state & diagnostic messages
+    REPL-->>Client: {"status": "ok", "goals": ["h : P |- Q"], "env": env_id_next}
+
+    Note over Client, REPL: Proof Completed
+    Client->>REPL: {"cmd": "run_tactic", "env": env_id_next, "tactic": "exact h"}
+    REPL->>Lean: Kernel typecheck proof term
+    Lean-->>REPL: No remaining goals (Proof Closed)
+    REPL-->>Client: {"status": "ok", "goals": [], "closed": true}
+
+    Note over Client, Indep: Independent Certificate Audit
+    Client->>Indep: Spawn fresh isolated `lake env lean` process
+    Indep->>Indep: Re-elaborate proof script from scratch
+    Indep-->>Client: Exit code 0 (Verified Without State Contamination)

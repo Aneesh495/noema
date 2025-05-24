@@ -1,0 +1,27 @@
+flowchart TD
+    subgraph TheoremPool ["Dynamic Curriculum Theorem Pool"]
+        Easy["Tier 1: Elementary (Pass Rate > 85%)"]
+        Medium["Tier 2: Intermediate (Pass Rate 30% - 85%)"]
+        Hard["Tier 3: Frontier (Pass Rate < 30%)"]
+    end
+
+    subgraph Proposer ["Teacher / Conjecture Generator"]
+        Mutate["Conjecture Mutation: Generalize / Specialize / Negate"]
+        Easy --> Mutate
+        Medium --> Mutate
+        Mutate --> CandidateTheorems["Synthesized Formal Conjectures"]
+    end
+
+    subgraph ProverSession ["Student Prover (Noema Search)"]
+        CandidateTheorems --> Search["MCTS / Beam Search with Regret Matching"]
+        Search --> Outcome{"Proof Succeeded?"}
+    end
+
+    subgraph FeedbackLoop ["Curriculum Adaptation & Replay"]
+        Outcome -->|Yes| FastSolve["Record Trace to Expert Replay Buffer"]
+        Outcome -->|No| HardFailure["Update Regret Table & Down-Weight"]
+        FastSolve --> ModelUpdate["Policy & Value Self-Improvement"]
+        ModelUpdate --> Search
+        Outcome --> TierShift["Adjust Theorem Difficulty Tier"]
+        TierShift --> TheoremPool
+    end

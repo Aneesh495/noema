@@ -1,0 +1,27 @@
+flowchart TD
+    subgraph RolloutStage ["Trajectory Rollout Collection"]
+        PolicyOld["Frozen Policy pi_theta_old"] --> Environment["Lean 4 Proof Search Env"]
+        Environment --> Trajectories["Proof Trajectories: (s_t, a_t, r_t, v_t, log_p_old)"]
+        Trajectories --> Buffer["PPO Rollout Buffer"]
+    end
+
+    subgraph AdvantageEst ["Advantage Estimation"]
+        Buffer --> ValueBaseline["Value Baseline Critic: V(s_t)"]
+        ValueBaseline --> GAE["Generalized Advantage Estimation (GAE-lambda)"]
+        GAE --> AdvNorm["Advantage Normalization"]
+    end
+
+    subgraph PPOMiniBatch ["PPO Optimization Epochs"]
+        AdvNorm --> Ratio["Importance Sampling Ratio: r_t(theta) = pi_theta / pi_old"]
+        Ratio --> ClippedSurrogate["Clipped Surrogate Loss: min(r_t * A_t, clip(r_t, 1-eps, 1+eps) * A_t)"]
+        Buffer --> ValueLoss["Squared Error Value Loss: (V_theta(s_t) - Returns_t)^2"]
+        Ratio --> Entropy["Policy Entropy Bonus: H(pi_theta)"]
+        ClippedSurrogate & ValueLoss & Entropy --> TotalLoss["Total Loss = -L_CLIP + c1 * L_VF - c2 * S"]
+    end
+
+    subgraph UpdateWeights ["Parameter Optimization"]
+        TotalLoss --> Backprop["Backward Pass & Gradient Clipping (max_norm=1.0)"]
+        Backprop --> AdamW["AdamW Optimizer Step (Cosine Decay)"]
+        AdamW --> NewWeights["Updated Model Weights theta"]
+        NewWeights --> PolicyOld
+    end

@@ -1,0 +1,26 @@
+flowchart TD
+    Root["Root Goal: G0 (OR-Node)"]
+    
+    subgraph TacticA ["Tactic Step A: split"]
+        HyperedgeA{"AND-Hyperedge A"}
+        Root --> HyperedgeA
+        HyperedgeA --> SubgoalA1["Subgoal G1: Left Branch (OR-Node)"]
+        HyperedgeA --> SubgoalA2["Subgoal G2: Right Branch (OR-Node)"]
+    end
+
+    subgraph TacticB ["Tactic Step B: intro h"]
+        HyperedgeB{"AND-Hyperedge B"}
+        Root --> HyperedgeB
+        HyperedgeB --> SubgoalB1["Subgoal G3: Hypothesis in Scope (OR-Node)"]
+    end
+
+    subgraph ProofSearch ["Subgoal Resolution"]
+        SubgoalA1 --> CloseA1["Tactic: exact h1 -> Solved (True)"]
+        SubgoalA2 --> CloseA2["Tactic: exact h2 -> Solved (True)"]
+        SubgoalB1 --> SubgoalB2["Tactic: cases h -> Open Subgoal"]
+    end
+
+    subgraph ValuePropagation ["Status & Value Backpropagation"]
+        CloseA1 & CloseA2 --> SolvedA{"Conjunctive AND Satisfied"}
+        SolvedA --> SolvedRoot["Root G0 Marked Solved (Disjunctive OR)"]
+    end

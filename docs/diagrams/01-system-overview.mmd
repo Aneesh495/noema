@@ -1,0 +1,32 @@
+flowchart TD
+    User["User / CLI Input"] --> Shell["Interactive Proof Shell"]
+    User --> Engine["Search Engine"]
+    
+    Shell --> Engine
+    
+    subgraph CoreSearch ["Search & Reasoning Subsystem"]
+        Engine --> Hypergraph["AND/OR Proof Hypergraph"]
+        Engine --> MCTS["MCTS with PUCT"]
+        Engine --> Backtrack["Dependency-Directed Backtracker"]
+        Engine --> Rewriter["Term Rewriter & Congruence Closure"]
+    end
+    
+    subgraph NeuralGuidance ["Neural Guidance Subsystem"]
+        MCTS --> Transformer["24-Block Transformer (60M Params)"]
+        Transformer --> PolicyHead["Tactic Policy Head"]
+        Transformer --> ValueHead["State Value Head"]
+        Transformer --> ProgressHead["Censored Progress Head"]
+        Engine --> HybridRetriever["Hybrid Premise Retriever"]
+    end
+    
+    subgraph FormalKernel ["Formal Environment"]
+        Engine --> REPL["Persistent Lean 4 REPL Session"]
+        REPL --> Lake["Lake 5.0.0 Toolchain"]
+        REPL --> LeanKernel["Lean 4.8.0 Kernel"]
+    end
+    
+    subgraph AuditCertificates ["Cryptographic Audit Store"]
+        LeanKernel --> Checker["Independent Fresh Process Checker"]
+        Checker --> CertManager["Certificate Manager"]
+        CertManager --> MerkleTree["Merkle Audit Ledger"]
+    end

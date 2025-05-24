@@ -1,0 +1,41 @@
+flowchart TD
+    subgraph Certificates ["Verified Proof Certificates"]
+        Cert1["Cert 1: theorem_add_comm.lean"]
+        Cert2["Cert 2: theorem_modus_ponens.lean"]
+        Cert3["Cert 3: theorem_de_morgan.lean"]
+        Cert4["Cert 4: theorem_group_inv.lean"]
+    end
+
+    subgraph LeafHashes ["Cryptographic Leaf Hashes (SHA-256)"]
+        H1["H1 = SHA-256(Cert 1)"]
+        H2["H2 = SHA-256(Cert 2)"]
+        H3["H3 = SHA-256(Cert 3)"]
+        H4["H4 = SHA-256(Cert 4)"]
+    end
+
+    Cert1 --> H1
+    Cert2 --> H2
+    Cert3 --> H3
+    Cert4 --> H4
+
+    subgraph IntermediateNodes ["Merkle Internal Nodes"]
+        H12["H12 = SHA-256(H1 || H2)"]
+        H34["H34 = SHA-256(H3 || H4)"]
+    end
+
+    H1 & H2 --> H12
+    H3 & H4 --> H34
+
+    subgraph MerkleRootNode ["Audit Ledger Root"]
+        RootHash["Merkle Root = SHA-256(H12 || H34)"]
+    end
+
+    H12 & H34 --> RootHash
+
+    subgraph AuditVerification ["Tamper-Evident Verification"]
+        RootHash --> Publish["Ledger Digest Snapshot"]
+        QueryCert["Audit Query: Verify Cert 2"] --> AuditPath["Inclusion Proof: [H1, H34]"]
+        AuditPath --> Recompute["Recompute: SHA-256(SHA-256(H1 || H2) || H34)"]
+        Recompute --> CheckMatch{"Matches Root?"}
+        CheckMatch -->|Identical| Valid["Proof Certificate Authenticity Guaranteed"]
+    end
