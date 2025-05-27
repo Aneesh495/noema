@@ -84,5 +84,30 @@ def verify(evidence):
     sys.exit(verify_evidence_bundle(evidence_dir=evidence))
 
 
+@main.command()
+@click.option("--theorem", default=None, help="Lean 4 theorem declaration to prove interactively")
+def shell(theorem):
+    """Launch interactive proof shell with neural assistance."""
+    from noema.contracts.theorems import TheoremSpec
+    from noema.contracts.states import ProofState, ProofGoal
+    from noema.shell import InteractiveProofShell
+    
+    decl = theorem or "theorem demo_id (P : Prop) : P → P := by"
+    th = TheoremSpec(
+        theorem_id="cli_interactive",
+        formal_statement=decl,
+        informal_statement="Interactive demonstration conjecture",
+        domain="logic",
+        difficulty=1,
+    )
+    init_state = ProofState(
+        state_id="init_0",
+        goals=[ProofGoal(goal_id="g0", target_type="P → P")],
+    )
+    click.echo(f"Starting interactive proof shell for: {decl}")
+    sh = InteractiveProofShell(theorem=th, initial_state=init_state)
+    click.echo("Type tactics, 'suggest', 'undo', 'status', or 'help'.")
+
+
 if __name__ == "__main__":
     main()
