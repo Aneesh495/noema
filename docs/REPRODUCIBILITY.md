@@ -21,8 +21,8 @@ This document outlines the hardware specifications, software dependencies, and e
 Clone the repository and initialize the Python environment:
 
 ```bash
-git clone https://github.com/Aneesh495/noema-prover.git
-cd noema-prover
+git clone https://github.com/Aneesh495/noema.git
+cd noema
 
 # Create and activate Python 3.12 virtual environment
 python3 -m venv .venv

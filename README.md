@@ -90,8 +90,8 @@ Detailed experiment configurations and ablations are documented in [`docs/BENCHM
 
 ```bash
 # Clone repository
-git clone https://github.com/Aneesh495/noema-prover.git
-cd noema-prover
+git clone https://github.com/Aneesh495/noema.git
+cd noema
 
 # Setup Python virtual environment
 python3 -m venv .venv
