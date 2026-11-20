@@ -1,10 +1,10 @@
-# Walkthrough 1: Interactive Proof Session with Lean 4 REPL
+# Walkthrough 1: Interactive Lean 4 Proof Session
 
-This guide details how to interact directly with the Lean 4 proof environment using Noema's persistent REPL protocol and interactive terminal shell.
+Noema's terminal shell checks tactics with Lean and displays the goals that remain after each step. You can also use the same shell from Python.
 
 ## Prerequisites
 
-Ensure the Lean 4 environment is built and accessible via Lake:
+Build the Lean package from the repository root:
 
 ```bash
 cd lean
@@ -12,86 +12,52 @@ lake build
 cd ..
 ```
 
-Verify that the Python virtual environment is active and Noema is installed in editable mode:
+Install Noema in an active virtual environment as described in the [quickstart](../../README.md#installation--setup).
 
-```bash
-source .venv/bin/activate
-python3 -c "import noema; print(noema.__name__)"
-```
-
-## Launching the Interactive Shell
-
-Run the interactive proof shell and enter Lean tactics at the `noema>` prompt. The CLI uses built-in tactic hints when no model is attached.
+## Launch the terminal shell
 
 ```bash
 python3 -m noema.cli shell
 ```
 
-The default theorem has one proposition binder. Enter `intro P h`, then `exact h`. Use `status` to inspect the result and `quit` to leave. To open a different theorem, pass its declaration to `--theorem`.
+The default theorem has one proposition binder. Enter `intro P h`, then `exact h`. Use `status` to inspect the result and `quit` to leave. The CLI uses built-in tactic hints when no model is attached.
+
+Pass a different declaration with `--theorem`:
 
 ```bash
 python3 -m noema.cli shell --theorem 'theorem and_comm_demo (P Q : Prop) : P ∧ Q → Q ∧ P := by'
 ```
 
-Alternatively, you can drive the REPL programmatically from Python using the `LeanREPLSession` client.
-
-## Programmatic REPL Session Example
-
-Create a script or execute in a Python session:
+## Run the same proof from Python
 
 ```python
-import sys
-from noema.formal.repl import LeanREPLSession
+from noema.contracts.states import ProofGoal, ProofState
+from noema.contracts.theorems import TheoremSpec
+from noema.shell import InteractiveProofShell
 
-# Initialize persistent session using Lake environment
-session = LeanREPLSession(project_dir="lean")
-session.start()
+theorem = TheoremSpec(
+    theorem_id="and_comm_demo",
+    name="and_comm_demo",
+    module="Init",
+    statement="∀ (P Q : Prop), P ∧ Q → Q ∧ P",
+    family="logic",
+)
+initial_state = ProofState(
+    state_id="start",
+    goals=[ProofGoal(goal_id="g0", target=theorem.statement, mvar_id="?m.0")],
+)
+shell = InteractiveProofShell(theorem, initial_state)
 
-# Define theorem declaration in Lean 4
-theorem_code = """
-theorem and_comm_demo (P Q : Prop) : P ∧ Q → Q ∧ P := by
-"""
+for tactic in ("intro P Q h", "constructor", "exact h.2", "exact h.1"):
+    accepted, message = shell.execute_tactic(tactic)
+    if not accepted:
+        raise RuntimeError(message)
+    print(message)
 
-# Send declaration to initialize proof state
-response = session.submit_command(theorem_code)
-print(f"Session state ID: {response.env_id}")
-print(f"Open goals: {response.goals}")
-# Output: [ "case intro\nP Q : Prop\nh : P ∧ Q\n⊢ Q ∧ P" ]
-
-# Execute first tactic: intro h
-t1 = session.run_tactic(response.env_id, "intro h")
-print(f"Tactic 1 status: {t1.status}, Goals: {t1.goals}")
-
-# Execute second tactic: constructor
-t2 = session.run_tactic(t1.env_id, "constructor")
-print(f"Tactic 2 status: {t2.status}, Goals: {t2.goals}")
-# Two subgoals created: ⊢ Q and ⊢ P
-
-# Resolve first branch
-t3 = session.run_tactic(t2.env_id, "exact h.2")
-print(f"Tactic 3 status: {t3.status}, Remaining goals: {t3.goals}")
-
-# Resolve second branch and close proof
-t4 = session.run_tactic(t3.env_id, "exact h.1")
-print(f"Tactic 4 status: {t4.status}, Closed: {t4.is_closed}")
-
-session.close()
+print(shell.format_status())
+assert shell.is_solved
 ```
 
-## State Snapshotting and Rollback
+After `constructor`, Lean reports two goals, `Q` and `P`. The final status reads `SOLVED (QED)`. Each accepted step saves the previous and next proof states. Use `shell.undo()` and `shell.redo()` to move between them.
 
-The REPL protocol treats proof search states as immutable environment IDs:
-- Every successful tactic application yields a distinct `env_id`.
-- Backtracking is achieved by branching from a parent `env_id` without restarting the process.
-- If a speculative tactic fails or diverges, the search engine discards the erroneous child `env_id` and continues from the parent.
-
-## Diagnostic Handling
-
-When an invalid tactic is evaluated, the REPL captures the diagnostic message without crashing:
-
-```python
-err_resp = session.run_tactic(t2.env_id, "ring")
-if err_resp.has_error:
-    print(f"Kernel error message: {err_resp.error_message}")
-    # Search resumes from t2.env_id safely
-```
+When Lean rejects a tactic, `execute_tactic()` returns `False` with the diagnostic and keeps the last accepted state and history.
