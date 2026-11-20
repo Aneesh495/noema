@@ -1,87 +1,90 @@
 # Walkthrough 3: Proof Search with AND/OR Hypergraphs and MCTS
 
-This walkthrough explains how Noema navigates complex formal proofs using Monte Carlo Tree Search (MCTS) guided by AND/OR proof hypergraphs and equational reasoning engines.
+A proof goal can have several candidate tactics. Choosing a tactic is an OR decision. If the tactic creates several subgoals, the resulting AND edge succeeds once all of them are proved.
 
-## Hypergraph Proof Search Mechanics
+## Search for a proof
 
-Unlike simple single-path game trees, formal mathematical proof trees feature branching subgoals:
-- **OR-Nodes**: Represent open proof goals. Any valid branch that solves this goal is sufficient (disjunctive).
-- **AND-Hyperedges**: Represent multi-goal tactic applications (e.g. `constructor`, `split`, `apply And.intro`). All generated subgoals must be solved concurrently (conjunctive).
-
-## Search Algorithm Execution
-
-Execute proof search programmatically using `MCTSSearchEngine`:
+This example uses a fixed tactic policy to make the search repeatable. Lean checks the transitions. The independent checker replays the returned tactics.
 
 ```python
-from noema.search.mcts import MCTSSearchEngine, MCTSConfig
-from noema.formal.repl import LeanREPLSession
-from noema.models.transformer import ProverTransformer
+from noema.contracts.actions import TacticAction
+from noema.contracts.environment import EnvironmentSpec
+from noema.contracts.theorems import TheoremSpec
+from noema.formal.bridge import FormalBridge
+from noema.formal.checker import IndependentChecker
+from noema.search.mcts import MCTSProofSearch
 
-# Initialize environment and neural guide
-repl = LeanREPLSession(project_dir="lean")
-repl.start()
-
-model = ProverTransformer.load_pretrained("checkpoints/model_24block_final.pt")
-
-config = MCTSConfig(
-    max_expansions=200,
-    c_puct=1.414,
-    temperature=0.7,
-    max_depth=30,
+environment = EnvironmentSpec(
+    toolchain="leanprover/lean4:v4.8.0",
+    imported_modules=["Init.Data.Nat.Basic"],
 )
-
-search_engine = MCTSSearchEngine(
-    repl=repl,
-    model=model,
-    config=config,
+theorem = TheoremSpec(
+    theorem_id="nat_reflexive",
+    name="nat_reflexive",
+    module="Init.Data.Nat.Basic",
+    statement="∀ (x : Nat), x = x",
 )
+bridge = FormalBridge(environment)
+initial, _ = bridge.get_initial_state(theorem)
+search = MCTSProofSearch(bridge, max_depth=5)
 
-theorem_statement = "theorem demo (P Q : Prop) : P ∧ Q → P := by"
-proof_result = search_engine.prove(theorem_statement)
 
-if proof_result.success:
-    print("Proof discovered successfully.")
-    print("Extracted tactic script:")
-    for step in proof_result.tactics:
-        print(f"  {step}")
-else:
-    print("Search budget exhausted before proof resolution.")
+def policy(state):
+    tactic = "intro x" if state.depth == 0 else "rfl"
+    return [(TacticAction.from_string(tactic), 1.0)]
+
+
+proved, actions, stats = search.search(
+    theorem, initial, policy_fn=policy, value_fn=lambda state: 0.5, max_iterations=10
+)
+if not proved:
+    raise RuntimeError(f"Search ended after {stats['iterations']} iterations")
+
+script = "\n".join(action.raw_tactic for action in actions)
+_, audit = IndependentChecker(environment).verify_proof(theorem, script)
+assert audit.is_valid
+print(script)
 ```
 
-## Hybridizing with Equational Rewriting
+## Explain a congruence
 
-When algebraic identities or equality chains are present in local hypotheses, Noema integrates a congruence closure engine:
+Register both function applications and then assert equality of their arguments. The explanation records how the closure engine derived their equivalence.
 
 ```python
 from noema.search.congruence import CongruenceClosure
 
-# Build equational graph from hypotheses: a = b, b = c, f(a) = d
-cc = CongruenceClosure()
-cc.merge("a", "b")
-cc.merge("b", "c")
-cc.add_function("f", ["a"], "d")
+closure = CongruenceClosure()
+closure.add_term("f(a)")
+closure.add_term("f(c)")
+closure.assert_equality("a", "b", axiom_name="hyp_ab")
+closure.assert_equality("b", "c", axiom_name="hyp_bc")
 
-# Check whether f(c) = d holds
-is_congruent = cc.are_congruent("f(c)", "d")
-print(f"Are f(c) and d congruent: {is_congruent}")
-
-# Extract formal Lean 4 tactic sequence witnessing the equivalence
-witness_proof = cc.explain_equivalence("f(c)", "d")
-print(f"Generated Lean tactic: {witness_proof}")
+assert closure.are_equal("f(a)", "f(c)")
+for step in closure.explain("f(a)", "f(c)"):
+    print(step.rationale)
 ```
 
-## Exporting Proof Visualizations
+## Export the search graph
 
-Noema can export search hypergraphs and solved proof DAGs to DOT, Cytoscape JSON, or SVG formats:
+After running the search example, pass its states and edges to the graph exporter. A DOT file can be rendered with Graphviz.
 
 ```python
-from noema.artifacts.graph_export import export_proof_graph
+from pathlib import Path
+from noema.artifacts.graph_export import ProofGraphExporter
 
-# Export to DOT file for Graphviz rendering
-dot_path = "artifacts/proof_tree.dot"
-export_proof_graph(proof_result.graph, target_path=dot_path, format="dot")
+exporter = ProofGraphExporter()
+for node in search.nodes.values():
+    exporter.add_node(
+        node.state_id,
+        label=f"Depth {node.depth}",
+        is_proved=node.is_proved,
+        is_root=node.state_id == initial.state_id,
+        depth=node.depth,
+    )
+    for edge in node.outgoing_edges:
+        exporter.add_hyperedge(
+            edge.edge_id, node.state_id, edge.child_state_ids, edge.action.raw_tactic
+        )
 
-# Export to Cytoscape JSON for interactive web viewers
-json_path = "artifacts/proof_tree.json"
-export_proof_graph(proof_result.graph, target_path=json_path, format="cytoscape")
+Path("proof.dot").write_text(exporter.to_dot(), encoding="utf-8")
 ```
