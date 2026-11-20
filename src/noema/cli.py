@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import sys
 import click
 from noema.doctor import run_diagnostics
@@ -84,29 +85,87 @@ def verify(evidence):
     sys.exit(verify_evidence_bundle(evidence_dir=evidence))
 
 
+def _parse_theorem_declaration(declaration: str) -> tuple[str, str]:
+    match = re.fullmatch(r"\s*theorem\s+([\w.']+)\s*(.+?)\s*:=\s*by\s*", declaration, re.DOTALL)
+    if match:
+        name, signature = match.groups()
+        depth = 0
+        for index, char in enumerate(signature):
+            if char in "([{":
+                depth += 1
+            elif char in ")]}":
+                depth -= 1
+            elif char == ":" and depth == 0:
+                binders = signature[:index].strip()
+                proposition = signature[index + 1:].strip()
+                if proposition and (not binders or binders[0] in "([{"):
+                    return name, f"∀ {binders}, {proposition}" if binders else proposition
+                break
+    raise click.BadParameter("expected 'theorem name (optional binders) : proposition := by'", param_hint="--theorem")
+
+
 @main.command()
-@click.option("--theorem", default=None, help="Lean 4 theorem declaration to prove interactively")
-def shell(theorem):
-    """Launch interactive proof shell with neural assistance."""
-    from noema.contracts.theorems import TheoremSpec
+@click.option("--theorem", default="theorem demo_id (P : Prop) : P → P := by",
+              help="Lean 4 theorem declaration to prove interactively")
+def shell(theorem: str):
+    """Read tactics and check a proof interactively."""
     from noema.contracts.states import ProofState, ProofGoal
-    from noema.shell import InteractiveProofShell
-    
-    decl = theorem or "theorem demo_id (P : Prop) : P → P := by"
-    th = TheoremSpec(
+    from noema.contracts.theorems import TheoremSpec
+    from noema.shell import InteractiveProofShell, ShellCommandType
+
+    name, proposition = _parse_theorem_declaration(theorem)
+    theorem_spec = TheoremSpec(
         theorem_id="cli_interactive",
-        formal_statement=decl,
-        informal_statement="Interactive demonstration conjecture",
-        domain="logic",
-        difficulty=1,
+        name=name,
+        module="Init",
+        statement=proposition,
+        family="logic",
     )
-    init_state = ProofState(
+    initial_state = ProofState(
         state_id="init_0",
-        goals=[ProofGoal(goal_id="g0", target_type="P → P")],
+        goals=[ProofGoal(goal_id="g0", target=proposition, mvar_id="?m.0")],
     )
-    click.echo(f"Starting interactive proof shell for: {decl}")
-    sh = InteractiveProofShell(theorem=th, initial_state=init_state)
-    click.echo("Type tactics, 'suggest', 'undo', 'status', or 'help'.")
+    proof_shell = InteractiveProofShell(theorem=theorem_spec, initial_state=initial_state)
+    click.echo(proof_shell.format_status())
+    click.echo("Type a Lean tactic, 'help', or 'quit'.")
+
+    while True:
+        try:
+            command, argument = proof_shell.parse_command(input("noema> "))
+        except EOFError:
+            click.echo()
+            return
+
+        match command:
+            case ShellCommandType.QUIT:
+                return
+            case ShellCommandType.STATUS:
+                click.echo(proof_shell.format_status())
+            case ShellCommandType.HELP:
+                click.echo("Commands: status, undo, redo, suggest [count], retrieve <query>, export [path], quit")
+            case ShellCommandType.UNDO:
+                click.echo(proof_shell.undo()[1])
+            case ShellCommandType.REDO:
+                click.echo(proof_shell.redo()[1])
+            case ShellCommandType.SUGGEST:
+                try:
+                    count = int(argument or "5")
+                    if count < 1:
+                        raise ValueError
+                except ValueError:
+                    click.echo("Suggestion count must be a positive integer.")
+                    continue
+                for tactic, _ in proof_shell.suggest_tactics(top_k=count)[:count]:
+                    click.echo(tactic)
+            case ShellCommandType.RETRIEVE:
+                click.echo("\n".join(proof_shell.retrieve_premises(argument)) or "No matching premises.")
+            case ShellCommandType.EXPORT:
+                try:
+                    click.echo(proof_shell.export_proof_script(argument or None))
+                except OSError as error:
+                    click.echo(f"Export failed: {error}", err=True)
+            case ShellCommandType.TACTIC:
+                click.echo(proof_shell.execute_tactic(argument)[1] if argument else "Enter a Lean tactic.")
 
 
 if __name__ == "__main__":

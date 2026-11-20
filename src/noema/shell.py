@@ -12,6 +12,7 @@ from noema.contracts.environment import EnvironmentSpec
 from noema.contracts.states import LocalHypothesis, ProofGoal, ProofState
 from noema.contracts.theorems import TheoremSpec
 from noema.formal.checker import IndependentChecker
+from noema.formal.parser import GoalParser
 
 
 class ShellCommandType(Enum):
@@ -98,46 +99,30 @@ class InteractiveProofShell:
 
         cert, audit = self.checker.verify_proof(self.theorem, full_script)
         if audit.is_valid:
-            # Solved the full theorem
-            prev = self.current_state
-            self.applied_tactics.append(tactic_str)
-            new_state = ProofState(
-                state_id=f"state_{len(self.applied_tactics)}",
-                goals=[],
-                depth=self.current_state.depth + 1,
-            )
-            entry = ShellHistoryEntry(
-                tactic=tactic_str,
-                previous_state=prev,
-                next_state=new_state,
-            )
-            self.history.append(entry)
-            self.redo_stack.clear()
-            self.current_state = new_state
-            return True, "Theorem proved successfully! No goals remaining."
+            remaining_goals = []
+            message = "Theorem proved successfully! No goals remaining."
+        else:
+            diagnostics = cert.kernel_diagnostics
+            before, goal_marker, after = diagnostics.partition("error: unsolved goals\n")
+            if not goal_marker or "error:" in before or "error:" in after:
+                return False, f"Tactic rejected by Lean kernel: {diagnostics}"
+            # The independent checker appends the output of #print axioms.
+            goal_output = after.split("\n'", 1)[0].strip()
+            remaining_goals = GoalParser.parse_goals(goal_output)
+            if not remaining_goals:
+                return False, f"Could not read the remaining Lean goals: {diagnostics}"
+            message = f"Tactic '{tactic_str}' accepted. {len(remaining_goals)} goals remaining."
 
-        # If checker reported unsolved goals, advance partial state
-        if "unsolved goals" in cert.kernel_diagnostics or "error" not in cert.kernel_diagnostics.lower():
-            prev = self.current_state
-            self.applied_tactics.append(tactic_str)
-            # Simulated partial goal progression
-            remaining_goals = self.current_state.goals[1:] if len(self.current_state.goals) > 1 else self.current_state.goals
-            new_state = ProofState(
-                state_id=f"state_{len(self.applied_tactics)}",
-                goals=remaining_goals,
-                depth=self.current_state.depth + 1,
-            )
-            entry = ShellHistoryEntry(
-                tactic=tactic_str,
-                previous_state=prev,
-                next_state=new_state,
-            )
-            self.history.append(entry)
-            self.redo_stack.clear()
-            self.current_state = new_state
-            return True, f"Tactic '{tactic_str}' accepted. {len(new_state.goals)} goals remaining."
-
-        return False, f"Tactic rejected by Lean kernel: {cert.kernel_diagnostics}"
+        self.applied_tactics.append(tactic_str)
+        new_state = ProofState(
+            state_id=f"state_{len(self.applied_tactics)}",
+            goals=remaining_goals,
+            depth=self.current_state.depth + 1,
+        )
+        self.history.append(ShellHistoryEntry(tactic_str, self.current_state, new_state))
+        self.redo_stack.clear()
+        self.current_state = new_state
+        return True, message
 
     def suggest_tactics(self, top_k: int = 5) -> list[tuple[str, float]]:
         """Query the neural model policy for candidate tactic suggestions."""
