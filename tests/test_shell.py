@@ -1,6 +1,8 @@
 """Unit tests for interactive proof shell."""
 
 import pytest
+from click.testing import CliRunner
+from noema.cli import main
 from noema.contracts.environment import EnvironmentSpec
 from noema.contracts.states import LocalHypothesis, ProofGoal, ProofState
 from noema.contracts.theorems import TheoremSpec
@@ -89,6 +91,9 @@ def test_shell_execute_tactic_and_undo_redo(sample_theorem, sample_state):
     # First step
     ok, msg = shell.execute_tactic("intro P hp")
     assert ok
+    assert shell.current_state.goals[0].target == "P"
+    assert "hp : P" in shell.format_status()
+    assert "depends on axioms" not in shell.format_status()
 
     # Second step completes the proof
     ok2, msg2 = shell.execute_tactic("exact hp")
@@ -115,3 +120,32 @@ def test_shell_export_proof_script(sample_theorem, sample_state):
     exported = shell.export_proof_script()
     assert "theorem shell_id_thm : ∀ (P : Prop), P → P := by" in exported
     assert "exact hp" in exported
+
+
+def test_shell_cli_checks_tactics_and_keeps_reading_until_quit():
+    result = CliRunner().invoke(main, ["shell"], input="status\nintro P h\nexact h\nstatus\nquit\n")
+    assert result.exit_code == 0, result.output
+    assert "Active Goals: 1" in result.output
+    assert "Status: SOLVED (QED)" in result.output
+
+
+def test_shell_cli_with_documented_theorem_binders():
+    declaration = "theorem demo (P Q : Prop) : P ∧ Q → Q ∧ P := by"
+    result = CliRunner().invoke(main, ["shell", "--theorem", declaration], input="intro P Q h\nexact ⟨h.2, h.1⟩\n")
+    assert result.exit_code == 0, result.output
+    assert "Theorem proved successfully!" in result.output
+
+
+@pytest.mark.parametrize("tactic", ["sorry", "notATactic"])
+def test_shell_keeps_rejected_tactics_out_of_history(sample_theorem, sample_state, tactic):
+    shell = InteractiveProofShell(sample_theorem, sample_state)
+    accepted, _ = shell.execute_tactic(tactic)
+    assert not accepted
+    assert shell.current_state == sample_state
+    assert shell.applied_tactics == []
+
+
+def test_shell_cli_reports_an_invalid_declaration_as_usage_error():
+    result = CliRunner().invoke(main, ["shell", "--theorem", "not a declaration"])
+    assert result.exit_code == 2
+    assert "expected 'theorem name" in result.output

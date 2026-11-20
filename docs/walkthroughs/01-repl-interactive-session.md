@@ -21,10 +21,16 @@ python3 -c "import noema; print(noema.__name__)"
 
 ## Launching the Interactive Shell
 
-Noema includes a dedicated proof shell with syntax awareness, neural tactic completion, and undo/redo capabilities:
+Run the interactive proof shell and enter Lean tactics at the `noema>` prompt. The CLI uses built-in tactic hints when no model is attached.
 
 ```bash
-python3 -m noema.shell
+python3 -m noema.cli shell
+```
+
+The default theorem has one proposition binder. Enter `intro P h`, then `exact h`. Use `status` to inspect the result and `quit` to leave. To open a different theorem, pass its declaration to `--theorem`.
+
+```bash
+python3 -m noema.cli shell --theorem 'theorem and_comm_demo (P Q : Prop) : P ∧ Q → Q ∧ P := by'
 ```
 
 Alternatively, you can drive the REPL programmatically from Python using the `LeanREPLSession` client.
