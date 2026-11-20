@@ -18,7 +18,7 @@ doctor:
 
 build:
 	uv pip install -e . --python $(PYTHON)
-	cd lean && lake build || true
+	cd lean && lake build
 
 test:
 	$(PYTEST) tests/ -v --timeout=120
